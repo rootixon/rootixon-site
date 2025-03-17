@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rootixon</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --text-color: #f0f0f0;
+            --accent-color: #6c5ce7;
+            --card-bg: #191919;
+            --border-color: #2d2d2d;
+            --secondary-text: #aaaaaa;
+            --snow-color: #ffffff;
+            --moon-glow: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+            --secondary-text: #666;
+            --snow-color: #aaaaaa;
+            --moon-glow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="none" stroke="%236c5ce7" stroke-width="4"/></svg>') 16 16, auto;
+        }
+
+        a, button, .discord-id, .bio, .close-btn {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="none" stroke="%236c5ce7" stroke-width="4"/></svg>') 16 16, pointer;
+        }
+
+        .night-sky {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 80% 20%, #1a2a6c 10%, #0f0f0f 70%);
+            z-index: -2;
+            transition: background 0.5s ease;
+        }
+
+        .moon {
+            position: fixed;
+            top: 50px;
+            right: 50px;
+            width: 80px;
+            height: 80px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            box-shadow: 0 0 40px var(--moon-glow);
+            z-index: -1;
+            transition: background 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        [data-theme="light"] .night-sky {
+            background: radial-gradient(circle at 80% 20%, #87ceeb 10%, #f0f2f5 70%);
+        }
+
+        [data-theme="light"] .moon {
+            background: #ffd700;
+            box-shadow: 0 0 40px var(--moon-glow);
+        }
+
+        .container {
+            max-width: 450px;
+            width: 100%;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: block;
+            border: 2px solid var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            z-index: 10;
+        }
+
+        .theme-toggle.dark {
+            background-color: #333;
+        }
+
+        .theme-toggle.light {
+            background-color: #fff;
+        }
+
+        .theme-toggle:hover {
+            opacity: 0.8;
+        }
+
+        .username {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .discord-id {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .discord-id:hover {
+            color: var(--accent-color);
+        }
+
+        .bio {
+            color: var(--secondary-text);
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            cursor: pointer;
+        }
+
+        .bio:hover {
+            color: var(--accent-color);
+        }
+
+        .skills-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background-color: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            z-index: 100;
+            opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .skills-popup.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .skills {
+            margin-top: 20px;
+        }
+        .skill {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .skill span {
+            width: 80px;
+            font-size: 16px;
+            color: var(--secondary-text);
+            display: flex;
+            align-items: center;
+        }
+        .skill-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        .bar {
+            height: 12px;
+            background-color: var(--accent-color);
+            border-radius: 6px;
+            width: 0;
+            transition: width 0.6s ease-in-out;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            transition: transform 0.3s, opacity 0.3s;
+            opacity: 0.7;
+            color: var(--text-color);
+        }
+
+        .icon:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .link-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            background-color: #222;
+            border-color: var(--accent-color);
+        }
+
+        .link-card:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
+        }
+
+        [data-theme="light"] .link-card:hover {
+            background-color: #f5f5f5;
+        }
+
+        .link-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            color: var(--text-color);
+        }
+
+        .link-title {
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            flex-grow: 1;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 50;
+        }
+
+        .notification.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .snowflake {
+            position: fixed;
+            color: var(--snow-color);
+            font-size: 0.8em;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+            z-index: 0;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh); opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0.3; }
+        }
+
+        #snow-pile {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.8), transparent);
+            z-index: 0;
+            transition: height 0.5s ease;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: var(--secondary-text);
+            z-index: 1;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            .bio {
+                max-width: 300px;
+            }
+            .skills-popup {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body data-theme="dark">
+    <div class="night-sky"></div>
+    <div class="moon"></div>
+    <div id="snow-pile"></div>
+    <div class="container">
+        <div class="profile" id="profileCard">
+            <img src="darkpp2.jpg" alt="Profile Picture" class="profile-pic">
+            <h1 class="username">rootixon</h1>
+            <span class="discord-id" id="discordId" title="Copy? Click it!">Discord: rootixon</span>
+            <p class="bio" id="skillsTrigger">Python / HTML / CSS / JS</p>
+            <div class="icons" id="socialIcons"></div>
+            <div class="skills-popup" id="skillsPopup">
+                <button class="close-btn" id="closePopup">×</button>
+                <div class="skills">
+                    <div class="skill">
+                        <span>
+                            <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                            Python
+                        </span>
+                        <div class="bar" style="width: 0;" data-width="70%"></div>
+                    </div>
+                    <div class="skill">
+                        <span>
+                            <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                            HTML
+                        </span>
+                        <div class="bar" style="width: 0;" data-width="40%"></div>
+                    </div>
+                    <div class="skill">
+                        <span>
+                            <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/><path d="M9 9l3 3-3 3"/></svg>
+                            CSS
+                        </span>
+                        <div class="bar" style="width: 0;" data-width="40%"></div>
+                    </div>
+                    <div class="skill">
+                        <span>
+                            <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                            JS
+                        </span>
+                        <div class="bar" style="width: 0;" data-width="55%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="links-container" id="linksContainer"></div>
+    </div>
+    <button class="theme-toggle dark" id="themeToggle"></button>
+    <div class="footer">Made by: rootixon & rokodev</div>
+    <div class="notification" id="copyNotification">Copied: rokodev</div>
+
+    <script>
+        const svgIcons = {
+            "github.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>`,
+            "discord.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.8c-.502-2.203-3.046-3.45-3.17-3.57-.126-.12-.252-.12-.376 0-1.13 1.095-2.01 1.972-2.635 2.735-1.88-.489-3.636-.489-5.5 0-.625-.763-1.506-1.64-2.634-2.735-.126-.12-.252-.12-.377 0-.125.12-2.67 1.367-3.17 3.57 0 0-1.635 6.587 3.048 9.682.125.12.25.12.376 0 .874-.842 1.567-1.775 2.133-2.735-1.13-.489-2.134-1.214-3.048-2.196 1.757 1.189 3.74 1.824 6.184 2.196 0 .245-.126.49-.126.734-.502 1.214-1.383 1.824-2.51 1.824-1.13 0-2.51-.732-2.51-1.824 0-.12-.12-.245-.245-.245h-1.006c-.125 0-.25.124-.25.245 0 2.44 3.047 3.53 4.01 3.53.878 0 1.968-.247 2.573-1.346.36.734.923 1.346 1.625 1.715.125.12.25.12.376 0 4.682-3.096 3.047-9.682 3.047-9.682z"/></svg>`,
+            "youtube.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>`
+        };
+
+        const userData = {
+            socialIcons: ["github.svg", "discord.svg", "youtube.svg"],
+            links: [
+                { title: "Discord Server", url: "https://discord.gg/", icon: "discord.svg" },
+                { title: "GitHub Profile", url: "https://github.com/rootixon", icon: "github.svg" },
+                { title: "Youtube Channel", url: "https://www.youtube.com/@rootixon", icon: "youtube.svg" }
+            ]
+        };
+
+        function updateUI() {
+            const socialIconsContainer = document.getElementById('socialIcons');
+            userData.socialIcons.forEach(icon => {
+                const iconElement = document.createElement('a');
+                iconElement.className = 'icon';
+                iconElement.innerHTML = svgIcons[icon];
+                switch (icon) {
+                    case "github.svg":
+                        iconElement.href = "https://github.com/rootixon";
+                        break;
+                    case "discord.svg":
+                        iconElement.href = "https://discord.gg/";
+                        break;
+                    case "youtube.svg":
+                        iconElement.href = "https://www.youtube.com/@rootixon";
+                        break;
+                }
+                iconElement.target = '_blank';
+                iconElement.rel = 'noopener noreferrer';
+                socialIconsContainer.appendChild(iconElement);
+            });
+
+            const linksContainer = document.getElementById('linksContainer');
+            userData.links.forEach(link => {
+                const linkCard = document.createElement('a');
+                linkCard.href = link.url;
+                linkCard.className = 'link-card';
+                linkCard.target = '_blank';
+                linkCard.rel = 'noopener noreferrer';
+
+                const iconElement = document.createElement('div');
+                iconElement.className = 'link-icon';
+                iconElement.innerHTML = svgIcons[link.icon];
+
+                const titleElement = document.createElement('span');
+                titleElement.className = 'link-title';
+                titleElement.textContent = link.title;
+
+                linkCard.appendChild(iconElement);
+                linkCard.appendChild(titleElement);
+                linksContainer.appendChild(linkCard);
+            });
+        }
+
+        const themeToggle = document.getElementById('themeToggle');
+        let snowInterval, snowAccumulateInterval;
+        themeToggle.addEventListener('click', () => {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeToggle.classList.remove('dark');
+                themeToggle.classList.add('light');
+                clearInterval(snowInterval);
+                clearInterval(snowAccumulateInterval);
+                document.getElementById('snow-pile').style.height = '0';
+                document.querySelectorAll('.snowflake').forEach(s => s.remove());
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.classList.remove('light');
+                themeToggle.classList.add('dark');
+                snowInterval = setInterval(createSnowflake, 500);
+                snowAccumulateInterval = setInterval(accumulateSnow, 500);
+            }
+        });
+
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.innerHTML = '❄';
+            snowflake.style.left = (Math.random() * 100) + 'vw';
+            snowflake.style.animationDuration = Math.random() * 10 + 10 + 's';
+            snowflake.style.opacity = Math.random() * 0.4 + 0.2;
+            document.body.appendChild(snowflake);
+
+            setTimeout(() => {
+                snowflake.remove();
+            }, 20000);
+        }
+
+        let snowHeight = 0;
+        const snowPile = document.getElementById('snow-pile');
+        function accumulateSnow() {
+            snowHeight += 0.05;
+            if (snowHeight > 100) snowHeight = 100;
+            snowPile.style.height = snowHeight + 'px';
+        }
+
+        const profileCard = document.getElementById('profileCard');
+        profileCard.addEventListener('mousemove', (e) => {
+            const rect = profileCard.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = (y - centerY) / 20;
+            const rotateY = (centerX - x) / 20;
+            profileCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+        profileCard.addEventListener('mouseleave', () => {
+            profileCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+        });
+
+        const discordId = document.getElementById('discordId');
+const copyNotification = document.getElementById('copyNotification');
+
+discordId.addEventListener('click', () => {
+    const text = 'rootixon';
+    navigator.clipboard.writeText(text).then(() => {
+        copyNotification.textContent = `Copied: ${text}`;
+        copyNotification.classList.add('active');
+        setTimeout(() => {
+            copyNotification.classList.remove('active');
+        }, 2000);
+    });
+});
+
+        const skillsTrigger = document.getElementById('skillsTrigger');
+        const skillsPopup = document.getElementById('skillsPopup');
+        const closePopup = document.getElementById('closePopup');
+
+        skillsTrigger.addEventListener('click', () => {
+            skillsPopup.classList.add('active');
+            setTimeout(() => {
+                document.querySelectorAll('.bar').forEach(bar => {
+                    bar.style.width = bar.getAttribute('data-width');
+                });
+            }, 100);
+        });
+
+        closePopup.addEventListener('click', () => {
+            skillsPopup.classList.remove('active');
+            document.querySelectorAll('.bar').forEach(bar => {
+                bar.style.width = '0';
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            snowInterval = setInterval(createSnowflake, 500);
+            snowAccumulateInterval = setInterval(accumulateSnow, 500);
+        });
+    </script>
+</body>
+</html>
